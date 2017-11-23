@@ -41,5 +41,6 @@ Host *.tocco.cust.vshn.net
     UserKnownHostsFile ~/.ssh/known_hosts_tocco
 
 Host *
-    IgnoreUnknown AddKeysToAgent  # new in OpenSSH 7.2
+    # new in OpenSSH 7.2
+    IgnoreUnknown AddKeysToAgent
     AddKeysToAgent yes
