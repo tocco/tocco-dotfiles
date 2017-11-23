@@ -44,3 +44,9 @@ Host *
     # new in OpenSSH 7.2
     IgnoreUnknown AddKeysToAgent
     AddKeysToAgent yes
+
+    # allow skipping .tocco.ch
+    CanonicalDomains tocco.ch
+    CanonicalizeHostname yes
+    CanonicalizeFallbackLocal no
+    CanonicalizeMaxDots 0
