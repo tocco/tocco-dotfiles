@@ -1,0 +1,26 @@
+#!/bin/bash
+set -Eeu
+
+customer_args=
+if [ $# -eq 0 ]; then
+    customer=
+elif [ "$1" = "--" ]; then
+    # -- builds all customers
+    customer=
+    shift
+else
+    customer=customer/$1
+    shift
+    if [ ! -d "$customer" ]; then
+        echo "ERROR: First argument must be the customer name (or -- to build all customers) but directory \"$customer\" wasn't found."
+        exit 1
+    fi
+    customer_args="-pl $customer"
+fi
+
+os=
+if [ "$(uname)" = "Darwin" ]; then
+    os=-Dmac
+fi
+
+exec mvn $customer_args -am install -T1.5C -DskipTests $os "$@"
