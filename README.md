@@ -4,7 +4,7 @@
 
 * `bin/`
 
-  Contains some useful scripts to make your lifes easier. Add `export PATH=~/PATH/TO/THIS/REPO/bin` to your ~/.profile
+  Contains some useful scripts to make your lifes easier. Add `export PATH="$HOME/PATH/TO/THIS/REPO/bin:$PATH"` to your ~/.profile
   and restart your terminal to make the commands available on your machine.
 
   See [bin](bin) directory for more details.
