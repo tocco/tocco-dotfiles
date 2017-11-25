@@ -22,6 +22,9 @@ Host zb.tocco.ch zbtest.tocco.ch
     User tocco
     Port 2222
 
+Host backup02.tocco.ch backup2.tocco.ch
+    Port 32711
+
 Host *.tocco.ch
     StrictHostKeyChecking yes
     User tocco
@@ -29,11 +32,11 @@ Host *.tocco.ch
 
 # uncomment in case git.tocco.ch is down
 #
-# Match host "*.tocco.ch,!backup02.tocco.ch" exec "getent ahosts backup02.tocco.ch |grep -qv '^10\.'"
-#     ProxyJump tocco-proxy@backup02.tocco.ch:32711
+# Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "getent ahosts backup02.tocco.ch |grep -qv '^10\.'"
+#     ProxyJump tocco-proxy@backup02.tocco.ch
 
 # only use jump host if git.tocco.ch isn't in the local network
-Match host "*.tocco.ch,!git.tocco.ch" exec "getent ahosts git.tocco.ch |grep -qv '^10\.'"
+Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "getent ahosts git.tocco.ch |grep -qv '^10\.'"
     ProxyJump tocco-proxy@git.tocco.ch
 
 Host *.tocco.cust.vshn.net
