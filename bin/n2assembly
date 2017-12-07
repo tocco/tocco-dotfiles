@@ -3,7 +3,7 @@ set -Eeu
 
 customer_args=
 if [ $# -eq 0 ]; then
-    echo "ERROR: First argument must missing (customer name)."
+    echo "ERROR: First argument missing (customer name)."
     exit 1
 else
     customer=customer/$1
@@ -15,4 +15,4 @@ else
     customer_args="-pl $customer"
 fi
 
-exec mvn $customer -am clean install -T1.5C -DskipTests -P assembly "$@"
+exec mvn $customer_args -am clean install -T1.5C -DskipTests -P assembly "$@"
