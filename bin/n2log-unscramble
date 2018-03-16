@@ -40,9 +40,7 @@ def is_level_enabled(level, level_enabled):
     if level is None:
         return True
 
-    if LEVELS[level_enabled] <= LEVELS[level.lower()]:
-        return True
-    return False
+    return LEVELS[level_enabled] <= LEVELS[level.lower()]
 
 
 def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
