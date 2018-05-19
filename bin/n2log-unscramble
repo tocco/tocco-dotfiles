@@ -51,10 +51,7 @@ def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
             if not is_level_enabled(msg.get('level'), level):
                 continue
 
-            for value in msg.values():
-                if predicate(str(value)):
-                    break
-            else:
+            if not predicate(msg.values()):
                 continue
 
             print(
@@ -81,9 +78,9 @@ def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
 def generate_predicate(search_term, flags):
     if search_term is not None:
         regex = re.compile(search_term, reduce(operator.or_, flags))
-        return lambda s: regex.search(s)
+        return lambda s: regex.search(str(s))
     else:
-        return lambda s: True
+        return None
 
 
 def main():
@@ -93,6 +90,7 @@ def main():
                                         'trace or an MDC field (session_id, user_name, …).')
     arg_parser.add_argument('--ignore-case', '-i', dest='regex_flags', default=[re.MULTILINE],
                             action='append_const', const=re.IGNORECASE, help='Ignore case in SEARCH_TERM.')
+    arg_parser.add_argument('--inverted-match', '-v', help='Search terms to be excluded in result.')
     arg_parser.add_argument('--file', '-f', type=open, default=sys.stdin, nargs='?',
                        help='File from which to read logs. If omitted, logs are read from stdin')
     arg_parser.add_argument('--level', '-l', default='trace', choices=['trace', 'info', 'warn', 'error'],
@@ -100,10 +98,20 @@ def main():
     args = arg_parser.parse_args()
 
     try:
-        predicate = generate_predicate(args.search_term, args.regex_flags)
+        predicate_positive = generate_predicate(args.search_term, args.regex_flags)
+        predicate_negative = generate_predicate(args.inverted_match, args.regex_flags)
     except re.error as e:
-        message = 'failed to compile regular expression {!r}: {}'.format(args.search_term, e)
+        message = 'failed to compile regular expression {!r}: {}'.format(e.pattern, e)
         arg_parser.error(argparse.ArgumentError(term, message))
+
+    def predicate(values):
+        if predicate_negative is not None and any(map(predicate_negative, values)):
+            return False
+
+        if predicate_positive is not None:
+            return any(map(predicate_positive, values))
+
+        return True
 
     unscramble(args.file, sys.stdout, level=args.level, predicate=predicate)
 
