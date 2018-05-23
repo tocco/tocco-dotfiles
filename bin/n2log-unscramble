@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import argparse
 from datetime import datetime, timezone
+import enum
 from functools import reduce
 import json
 import operator
@@ -8,13 +9,21 @@ import re
 import sys
 
 NON_MDC = {'message', 'level', 'logger_name', 'message', 'thread_name', 'version', 'revision', 'tags', 'level_name', '@timestamp', 'stack_trace'}
-LEVELS = {
-    'trace': 0,
-    'debug': 1,
-    'info': 2,
-    'warn': 3,
-    'error': 4
-}
+
+
+class NotALogMessageError(Exception):
+    pass
+
+
+class Level(enum.IntEnum):
+    TRACE = 0,
+    DEBUG = 1,
+    INFO = 2,
+    WARN = 3,
+    ERROR = 4
+
+LEVEL_MIN = min(Level)
+LEVEL_MAX = max(Level)
 
 
 def local_time(ts):
@@ -40,13 +49,16 @@ def is_level_enabled(level, level_enabled):
     if level is None:
         return True
 
-    return LEVELS[level_enabled] <= LEVELS[level.lower()]
+    return level_enabled <= getattr(Level, level.upper(), LEVEL_MAX)
 
 
 def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
     for line in file:
         try:
             msg = json.loads(line)
+
+            if not isinstance(msg, dict):
+                raise NotALogMessageError()
 
             if not is_level_enabled(msg.get('level'), level):
                 continue
@@ -70,7 +82,7 @@ def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
                 print()
                 print(trace)
             print('=' * 100)
-        except json.decoder.JSONDecodeError:
+        except (json.decoder.JSONDecodeError, NotALogMessageError):
             if predicate(line):
                 print('PLAIN TEXT: ', line, end='', file=output)
 
@@ -84,6 +96,10 @@ def generate_predicate(search_term, flags):
 
 
 def main():
+    class LevelAction(argparse.Action):
+        def __call__(self, parser, namespace, value, option_string=None):
+            setattr(namespace, self.dest, getattr(Level, value.upper()))
+
     arg_parser = argparse.ArgumentParser(description='unscramble Nice logfiles obtained using `oc logs …`')
     term = arg_parser.add_argument('search_term', metavar='SEARCH_TERM', nargs='?',
                                    help='Search pattern (regex) that need to appears in the log message stack '
@@ -93,8 +109,9 @@ def main():
     arg_parser.add_argument('--inverted-match', '-v', help='Search terms to be excluded in result.')
     arg_parser.add_argument('--file', '-f', type=open, default=sys.stdin, nargs='?',
                        help='File from which to read logs. If omitted, logs are read from stdin')
-    arg_parser.add_argument('--level', '-l', default='trace', choices=['trace', 'info', 'warn', 'error'],
-                            help='Max. log level shown')
+    arg_parser.add_argument('--level', '-l', default=LEVEL_MIN,
+                            choices=[i.name.lower() for i in Level],
+                            action=LevelAction, help='Max. log level shown')
     args = arg_parser.parse_args()
 
     try:
