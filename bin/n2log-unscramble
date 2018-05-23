@@ -83,7 +83,7 @@ def unscramble(file, output, *, level='INFO', predicate=lambda s: True):
                 print(trace)
             print('=' * 100)
         except (json.decoder.JSONDecodeError, NotALogMessageError):
-            if predicate(line):
+            if predicate([line]):
                 print('PLAIN TEXT: ', line, end='', file=output)
 
 
