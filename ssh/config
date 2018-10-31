@@ -29,6 +29,7 @@ Host *.tocco.ch
     StrictHostKeyChecking yes
     User tocco
     UserKnownHostsFile ~/.ssh/known_hosts_tocco
+    CheckHostIP no
 
 # uncomment in case git.tocco.ch is down
 #
@@ -42,6 +43,7 @@ Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec 
 Host *.tocco.cust.vshn.net
     StrictHostKeyChecking yes
     UserKnownHostsFile ~/.ssh/known_hosts_tocco
+    CheckHostIP no
 
 Host *
     # new in OpenSSH 7.2
