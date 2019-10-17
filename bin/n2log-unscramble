@@ -25,13 +25,29 @@ class Level(enum.IntEnum):
 LEVEL_MIN = min(Level)
 LEVEL_MAX = max(Level)
 
+TS_FORMATS = [
+    lambda ts: datetime.fromisoformat(ts),
+    lambda ts: datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S.%f+00:00'),
+    lambda ts: datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S.%fZ')
+]
+
 
 def local_time(ts):
     if ts is None:
         return 'UNKNOWN TIME'
 
-    ts = datetime.strptime(ts, '%Y-%m-%dT%H:%M:%S.%f+00:00')
-    ts = ts.replace(tzinfo=timezone.utc)
+    for fmt in TS_FORMATS:
+        try:
+            ts = fmt(ts)
+            break
+        except ValueError:
+            pass
+    else:
+        raise ValueError('Failed to parse timestamp {!r}'.format(ts))
+
+    if ts.tzinfo is None:
+        ts = ts.replace(tzinfo=timezone.utc)
+
     ts = ts.astimezone()
     return ts.strftime('%Y-%m-%d %H:%M:%S')
 
