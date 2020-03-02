@@ -3,6 +3,9 @@
 # Host *.tocco.cust.vshn.net
 #    User first_name.last_name  ### !!! REPLACE !!!
 
+# support added in OpenSSH 7.9
+IgnoreUnknown CASignatureAlgorithms
+
 Host juventus.tocco.ch juventustest.tocco.ch
     User tocco
 
@@ -40,7 +43,6 @@ Host *.tocco.ch *.tocco.cust.vshn.net
     Ciphers -*-cbc
     HostKeyAlgorithms -ssh-rsa,ecdsa-*
     MACs -*-sha1,*-sha1-*
-    IgnoreUnknown CASignatureAlgorithms
     CASignatureAlgorithms -ssh-rsa-cert-*
 
 Host *.tocco.ch
