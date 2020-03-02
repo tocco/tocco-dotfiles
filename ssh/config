@@ -38,7 +38,7 @@ Host monitor01.tocco.ch
 
 Host *.tocco.ch *.tocco.cust.vshn.net
     Ciphers -*-cbc
-    HostKeyAlgorithms -ssh-rsa
+    HostKeyAlgorithms -ssh-rsa,ecdsa-*
     MACs -*-sha1,*-sha1-*
     IgnoreUnknown CASignatureAlgorithms
     CASignatureAlgorithms -ssh-rsa-cert-*
