@@ -56,8 +56,11 @@ Host *.tocco.ch
 # Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "getent ahosts backup02.tocco.ch |grep -qv '^10\.'"
 #     ProxyJump tocco-proxy@backup02.tocco.ch
 
-# only use jump host if git.tocco.ch isn't in the local network
-Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "getent ahosts git.tocco.ch |grep -qv '^10\.'"
+# Only use a jump host if git.tocco.ch isn't in the local network
+# (=not connected to the office network).
+#
+# getent is installed by default on Linux, dig, by default, on Mac
+Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "{ getent ahosts git.tocco.ch || dig +short git.tocco.ch; } 2>/dev/null | grep -qv '^10\.'"
     ProxyJump tocco-proxy@git.tocco.ch
 
 Host *.tocco.cust.vshn.net
