@@ -17,7 +17,7 @@ Host sfbtest.tocco.ch
     User tocco
     Port 4456
 
-Host sfbtest4.tocco.ch
+Host sfb4test.tocco.ch
     User tocco
     Port 4442
 
