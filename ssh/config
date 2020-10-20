@@ -33,7 +33,7 @@ Host zb.tocco.ch zbtest.tocco.ch
     User tocco
     Port 2222
 
-Host backup02.tocco.ch backup2.tocco.ch
+Host backup02.tocco.ch backup2.tocco.ch git.tocco.ch
     Port 32711
 
 Host monitor01.tocco.ch
