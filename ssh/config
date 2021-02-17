@@ -3,12 +3,6 @@
 # Host *.tocco.cust.vshn.net
 #    User first_name.last_name  ### !!! REPLACE !!!
 
-# support added in OpenSSH 7.9
-IgnoreUnknown CASignatureAlgorithms
-
-Host juventus.tocco.ch juventustest.tocco.ch
-    User tocco
-
 Host sfb.tocco.ch
     User tocco
     Port 4446
@@ -29,10 +23,6 @@ Host sfbvtest.tocco.ch
     User tocco
     Port 4454
 
-Host zb.tocco.ch zbtest.tocco.ch
-    User tocco
-    Port 2222
-
 Host backup02.tocco.ch backup2.tocco.ch git.tocco.ch
     Port 32711
 
@@ -40,41 +30,48 @@ Host monitor01.tocco.ch
     HostKeyAlgorithms +ssh-rsa
 
 Host *.tocco.ch *.tocco.cust.vshn.net
+    # Disable obsolete algorithms
     Ciphers -*-cbc
     HostKeyAlgorithms -ssh-rsa,ecdsa-*
     MACs -*-sha1,*-sha1-*
-    CASignatureAlgorithms -ssh-rsa-cert-*
+
+    # Disable password authentication
+    ChallengeResponseAuthentication no
+    PasswordAuthentication no
+
+    ForwardX11Trusted no
+    StrictHostKeyChecking yes
+
+    # Keys added automatically are added to the first file
+    UserKnownHostsFile ~/.ssh/known_hosts_tocco_local ~/.ssh/known_hosts_tocco
 
 Host *.tocco.ch
-    StrictHostKeyChecking yes
     User tocco
-    UserKnownHostsFile ~/.ssh/known_hosts_tocco
-    CheckHostIP no
 
-# uncomment in case git.tocco.ch is down
+# If an IP in the network 2001:8e3:5396:c92::/64 is assigned to us, we're
+# in the office network. This detection may not always work from within a
+# VM though, thus, we insert a synthetic entry for check-office.tocco.ch
+# on the firewall, which likely works in those cases. Running both tests
+# as I have seen people that misconfigured DNS.
 #
-# Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "getent ahosts backup02.tocco.ch |grep -qv '^10\.'"
-#     ProxyJump tocco-proxy@backup02.tocco.ch
+# `ip` and `getent` are used on Linux, `ifconfig` and `dig` on Mac
+Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "{ ip addr; ifconfig; } 2>/dev/null | grep -qv 'inet6 2001:8e3:5396:c92:' || { getent ahosts office-check.tocco.ch || dig +short office-check.tocco.ch; } | grep -qv '^1.2.3.4'"
 
-# Only use a jump host if git.tocco.ch isn't in the local network
-# (=not connected to the office network).
-#
-# getent is installed by default on Linux, dig, by default, on Mac
-Match host "*.tocco.ch,!git.tocco.ch,!backup02.tocco.ch,!backup2.tocco.ch" exec "{ getent ahosts git.tocco.ch || dig +short git.tocco.ch; } 2>/dev/null | grep -qv '^10\.'"
+    # uncomment in case git.tocco.ch is down
+    # ProxyJump tocco-proxy@backup02.tocco.ch
+
     ProxyJump tocco-proxy@git.tocco.ch
 
-Host *.tocco.cust.vshn.net
-    StrictHostKeyChecking yes
-    UserKnownHostsFile ~/.ssh/known_hosts_tocco
-    CheckHostIP no
+Host *.onion
+    CanonicalizeHostname no
+    VerifyHostKeyDNS no
 
 Host *
-    # new in OpenSSH 7.2
-    IgnoreUnknown AddKeysToAgent
     AddKeysToAgent yes
+    CheckHostIP no
 
-    # allow skipping .tocco.ch
-    CanonicalDomains tocco.ch
-    CanonicalizeHostname yes
-    CanonicalizeFallbackLocal no
-    CanonicalizeMaxDots 0
+    # allow skipping .tocco.ch and .tocco.cust.vshn.net
+    CanonicalDomains tocco.ch tocco.cust.vshn.net
+    CanonicalizeHostname always
+    CanonicalizeFallbackLocal yes
+    CanonicalizeMaxDots 1
